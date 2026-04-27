@@ -1,11 +1,32 @@
 import { useEffect } from 'react'; // Used to disable the right-click popup menu
+import { useMemo } from "react";
+import { PIECE_IMAGES} from "../../lib/pieceMap";
+import  {type BitboardData, BitboardsToBoard } from "../../utils/board-state";
 import './Board.css'
+
+// ==================== Temporary Bitboards (for testing) ==========================
+const DUMMY_BITBOARDS: BitboardData = {
+    whitePawns:   0x000000000000FF00n,
+    whiteKnights: 0x0000000000000042n,
+    whiteBishops: 0x0000000000000024n,
+    whiteRooks:   0x0000000000000081n,
+    whiteQueens:  0x0000000000000008n,
+    whiteKing:    0x0000000000000010n,
+    blackPawns:   0x00FF000000000000n,
+    blackKnights: 0x4200000000000000n,
+    blackBishops: 0x2400000000000000n,
+    blackRooks:   0x8100000000000000n,
+    blackQueens:  0x0800000000000000n,
+    blackKing:    0x1000000000000000n,
+};
+
+
 // returns a button element for the grids
 // ==================== CONSTANTS ==========================
 const SQUARE_SIZE = 100; // In pixels
 const NUM_ROW = 8;
 const NUM_COL = 8;
-const IS_WHITE = false; // If you're playing white (dummy variable, im just using this to test UI for black/white)
+const IS_WHITE = true; // If you're playing white (dummy variable, im just using this to test UI for black/white)
 
 // =============== HELPER FUNCTIONS ==================== 
 function createNumberLabel(row: number, col: number) {
@@ -49,12 +70,13 @@ function BoardRightClicked(row: number, col: number) {
 // ======================= MAIN ============================
 function Board() {
     const squares = [];
+    const board = useMemo(() => BitboardsToBoard(DUMMY_BITBOARDS, IS_WHITE), []);
     for (let row = 0; row < NUM_ROW; row++) {
         for (let col = 0; col < NUM_COL; col++) {
             const isLight = (row + col) % 2 == 0  // Black: false(0), White: true(1)
             const squareID = `${row}-${col}`; // id of the current square
-            let x = col * SQUARE_SIZE;
-            let y = row * SQUARE_SIZE;
+            const x = col * SQUARE_SIZE;
+            const y = row * SQUARE_SIZE;
             const color = (isLight) ? "#EBD7A4" : "#385E0B";
 
             // CREATE BOARD SQUARES ============================= 
@@ -73,11 +95,23 @@ function Board() {
             squares.push(squareElement);
             
             // CREATE TEXT COORDINATES LABEL (1-8, a-h) ===================
-            if (col == 0) {
-                squares.push(createNumberLabel(row, col));
-            }
-            if (row == NUM_ROW-1) {
-                squares.push(createLetterLabel(row, col));
+            if (col == 0) squares.push(createNumberLabel(row, col));
+            if (row == NUM_ROW-1) squares.push(createLetterLabel(row, col));
+
+            // CREATE PIECE IMAGE ==============================
+            const piece = board[row * 8 + col];
+            if (piece && PIECE_IMAGES[piece]) {
+                squares.push(
+                    <image
+                        key={`piece-${row}-${col}`}
+                        x={x + 10}
+                        y={y + 10}
+                        width={SQUARE_SIZE - 20}
+                        height={SQUARE_SIZE - 20}
+                        href={PIECE_IMAGES[piece]}
+                        imageRendering="pixelated"
+                    />
+                );
             }
         }
     }

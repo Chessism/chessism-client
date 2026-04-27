@@ -1,5 +1,5 @@
 import './App.css'
-import Board from './game/Board'
+import Board from '../components/board/Board.tsx'
 
 function App() {
   // TypeScript ensures 'message' must be a string

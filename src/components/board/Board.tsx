@@ -1,4 +1,3 @@
-import { useEffect } from 'react'; // Used to disable the right-click popup menu
 import { useMemo } from "react";
 import { PIECE_IMAGES} from "../../lib/pieceMap";
 import  {type BitboardData, BitboardsToBoard } from "../../utils/board-state";

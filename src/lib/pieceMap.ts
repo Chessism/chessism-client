@@ -12,12 +12,14 @@ import b from '../assets/art-bishop-black-1.png'
 import n from '../assets/art-knight-black-1.png'
 import p from '../assets/art-pawn-black-1.png'
 
+export type PieceSymbol = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p';
+
 export const PIECE_IMAGES: Record<string, string> = {
     K, Q, R, B, N, P,
     k, q, r, b, n, p
 }  // Writing k, q, r is the same as 'k': k, 'q': q ...
 
-export const BITBOARD_FIELDS: [string, string][] = [
+export const BITBOARD_FIELDS: [string, PieceSymbol][] = [
     ['whiteKing', 'K'],
     ['whiteQueens', 'Q'],
     ['whiteRooks', 'R'],

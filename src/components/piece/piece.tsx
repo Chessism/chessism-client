@@ -1,14 +1,16 @@
-import {PIECE_IMAGES} from "../../lib/pieceMap";
+import {PIECE_IMAGES} from "../../lib/pieceMap.ts";
 import * as CONSTANTS from "../../constants.ts";
 
 type Params = {
     row: number;
     col: number;
     piece: string;
+    isDragging?: boolean;
+    onMouseDown?: (e: React.MouseEvent) => void;
 };
 
 // Storing Piece renderer settings
-function Piece({row, col, piece}: Params) {
+function Piece({row, col, piece, isDragging = false, onMouseDown}: Params) {
     const x = col * CONSTANTS.SQUARE_SIZE;
     const y = row * CONSTANTS.SQUARE_SIZE;
 
@@ -23,6 +25,8 @@ function Piece({row, col, piece}: Params) {
             height={CONSTANTS.SQUARE_SIZE - 20}
             href={img}
             imageRendering="pixelated"
+            style={{cursor: 'grab', opacity: isDragging ? 0.3: 1}}
+            onMouseDown={onMouseDown}
         />
     );
 }

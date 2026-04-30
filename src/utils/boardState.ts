@@ -1,4 +1,5 @@
 import { getSquaresFromBitboard, indexToScreenCoordinates} from "./bitboard.ts";
+import {type PieceSymbol} from "../lib/pieceMap.ts";
 import { BITBOARD_FIELDS} from "../lib/pieceMap.ts";
 
 export interface BitboardData {
@@ -16,8 +17,8 @@ export interface BitboardData {
     blackKing: bigint;
 }
 
-export function BitboardsToBoard(data: BitboardData, isWhite: boolean): (string | null)[] {
-    const board: (string | null)[] = Array(64).fill(null);
+export function BitboardsToBoard(data: BitboardData, isWhite: boolean): (PieceSymbol | null)[] {
+    const board: (PieceSymbol | null)[] = Array(64).fill(null);
 
     for (const [field, symbol] of BITBOARD_FIELDS) {
         const bitboard = data[field as keyof BitboardData];

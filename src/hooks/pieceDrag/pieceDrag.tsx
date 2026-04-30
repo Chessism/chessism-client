@@ -59,29 +59,34 @@ export function usePieceDrag({ svgRef, onDrop }: usePieceDragParams) {
 
     const endDrag = useCallback(
         (clientX: number, clientY: number) => {
-            setDrag(prev => {
-                if (!prev) return null;
+            if (!drag) return;
 
-                const { x, y } = getSVGPoint(clientX, clientY);
-                const to = coordsToSquare(x, y);
+            const { x, y } = getSVGPoint(clientX, clientY);
+            const to = coordsToSquare(x, y);
 
-                // Call the drop function for endDrag
-                onDrop?.({
-                    piece: prev.piece,
-                    from: { row: prev.fromRow, col: prev.fromCol },
-                    to,
-                });
-
-                // Clears the useState as the drag ended
-                return null;
+            // Call the drop function for endDrag
+            onDrop?.({
+                piece: drag.piece,
+                from: { row: drag.fromRow, col: drag.fromCol },
+                to,
             });
+
+            setDrag(null);
         },
-        [getSVGPoint, onDrop]
+        [drag, getSVGPoint, onDrop]
     );
 
     const cancelDrag = useCallback(() => {
-        setDrag(null);
-    }, []);
+        setDrag(prev => {
+            if (!prev) return null;
+            onDrop?.({
+                piece: prev.piece,
+                from: { row: prev.fromRow, col: prev.fromCol },
+                to: { row: prev.fromRow, col: prev.fromCol },
+            });
+            return null;
+        });
+    }, [onDrop]);
 
     return {
         drag,

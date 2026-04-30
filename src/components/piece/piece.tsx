@@ -1,21 +1,30 @@
-import {PIECE_IMAGES} from "../../lib/pieceMap.ts";
+import {PIECE_IMAGES, type PieceSymbol} from "../../lib/pieceMap.ts";
 import * as CONSTANTS from "../../constants.ts";
 
 type Params = {
     row: number;
     col: number;
-    piece: string;
+    piece: PieceSymbol;
     isDragging?: boolean;
-    onMouseDown?: (e: React.MouseEvent) => void;
+    startDrag: (row: number, col: number, piece: PieceSymbol, clinetX: number, clientY: number) => void;
+    onLeftClick?: (e: React.MouseEvent) => void;
+    onRightClick: (e: React.MouseEvent) => void;
 };
 
 // Storing Piece renderer settings
-function Piece({row, col, piece, isDragging = false, onMouseDown}: Params) {
+function Piece({row, col, piece, isDragging = false, startDrag, onLeftClick, onRightClick}: Params) {
     const x = col * CONSTANTS.SQUARE_SIZE;
     const y = row * CONSTANTS.SQUARE_SIZE;
 
     const img = PIECE_IMAGES[piece];
     if (!img) return null;
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (e.button !== 0) return; // Only allow left-click
+        onLeftClick?.(e);
+        e.preventDefault();
+        startDrag(row, col, piece, e.clientX, e.clientY);
+    }
 
     return (
         <image
@@ -25,8 +34,10 @@ function Piece({row, col, piece, isDragging = false, onMouseDown}: Params) {
             height={CONSTANTS.SQUARE_SIZE - 20}
             href={img}
             imageRendering="pixelated"
+            pointerEvents="all"
             style={{cursor: 'grab', opacity: isDragging ? 0.3: 1}}
-            onMouseDown={onMouseDown}
+            onMouseDown={handleMouseDown}
+            onContextMenu={onRightClick}
         />
     );
 }

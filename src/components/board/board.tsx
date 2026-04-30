@@ -3,6 +3,7 @@ import {type BitboardData, BitboardsToBoard} from "../../utils/boardState.ts";
 import {createLetterLabel, createNumberLabel} from "../../utils/boardRender.tsx";
 import {usePieceDrag} from "../../hooks/pieceDrag/pieceDrag.tsx";
 import {type PieceSymbol, PIECE_IMAGES} from "../../lib/pieceMap.ts";
+import {handleLeftClick, handleRightClick} from "./mouseEvents.tsx";
 import Square from "./square";
 import Piece from "../piece/piece.tsx";
 import * as CONSTANTS from "../../constants.ts";
@@ -59,7 +60,13 @@ function Board() {
             // Create Square Rendering
             elements.push(
                 // key: element identifier for rendering
-                <Square key={`sq-${row}-${col}`} row={row} col={col} />
+                <Square
+                    key={`sq-${row}-${col}`}
+                    row={row}
+                    col={col}
+                    onLeftClick={handleLeftClick(row, col)}
+                    onRightClick={handleRightClick(row, col)}
+                />
             );
             
             // CREATE TEXT COORDINATES LABEL (1-8, a-h) ===================
@@ -76,10 +83,9 @@ function Board() {
                         col={col}
                         piece={piece}
                         isDragging={isDragging}
-                        onMouseDown={(e) => {
-                            e.preventDefault();
-                            startDrag(row, col, piece, e.clientX, e.clientY)
-                        }}
+                        startDrag={startDrag}
+                        onLeftClick={handleLeftClick(row, col)}
+                        onRightClick={handleRightClick(row, col)}
                     />
                 );
             }
@@ -92,7 +98,10 @@ function Board() {
             ref={svgRef}
             viewBox={`0 0 ${CONSTANTS.NUM_COL * CONSTANTS.SQUARE_SIZE} ${CONSTANTS.NUM_ROW * CONSTANTS.SQUARE_SIZE}`}
             onMouseMove={(e) => moveDrag(e.clientX, e.clientY)}
-            onMouseUp={(e) => endDrag(e.clientX, e.clientY)}
+            onMouseUp={(e) => {
+                e.stopPropagation();
+                endDrag(e.clientX, e.clientY)
+            }}
             onMouseLeave={cancelDrag}
             onContextMenu={(e) => e.preventDefault()} // Disables the right-click popup menu when interacting with board
             >

@@ -34,6 +34,7 @@ function Board() {
     const {drag, draggingFrom, startDrag, moveDrag, endDrag, cancelDrag} = usePieceDrag({
         svgRef,
         onDrop: ({piece, from, to}) => {
+            if (from.row === to.row && from.col === to.col) return;  // Don't allow piece to be dropped on itself
             console.log(`Dropped ${piece} from ${from.row} ${from.col} to ${to.row} ${to.col}`);
             setBoard(
                 (prevBoard) => {
@@ -52,7 +53,7 @@ function Board() {
 
     for (let row = 0; row < CONSTANTS.NUM_ROW; row++) {
         for (let col = 0; col < CONSTANTS.NUM_COL; col++) {
-            const index = row * CONSTANTS.NUM_ROW + col;
+            const index = row * CONSTANTS.NUM_COL + col;
             const piece = board[index] as PieceSymbol | null;
 
             // Create Square Rendering

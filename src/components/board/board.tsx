@@ -1,5 +1,7 @@
-import {useMemo, useRef, useState} from "react";
-import {type BitboardData, BitboardsToBoard} from "../../utils/boardState.ts";
+import {useRef, useState, useCallback} from "react";
+import {useChessGame} from "../../hooks/webSocket/useChessBoard.ts";
+import {useChessPlayer} from "../../hooks/webSocket/useChessPlayer.ts";
+import {useChessSocket} from "../../hooks/webSocket/webSocket.ts"
 import {createLetterLabel, createNumberLabel} from "../../utils/boardRender.tsx";
 import {usePieceDrag} from "../../hooks/pieceDrag/pieceDrag.tsx";
 import {type PieceSymbol, PIECE_IMAGES} from "../../lib/pieceMap.ts";
@@ -9,43 +11,39 @@ import Piece from "../piece/piece.tsx";
 import * as CONSTANTS from "../../constants.ts";
 import './board.css'
 
-
-// ==================== Temporary Bitboards (for testing) ==========================
-const DUMMY_BITBOARDS: BitboardData = {
-    whitePawns:   0x000000000000FF00n,
-    whiteKnights: 0x0000000000000042n,
-    whiteBishops: 0x0000000000000024n,
-    whiteRooks:   0x0000000000000081n,
-    whiteQueens:  0x0000000000000008n,
-    whiteKing:    0x0000000000000010n,
-    blackPawns:   0x00FF000000000000n,
-    blackKnights: 0x4200000000000000n,
-    blackBishops: 0x2400000000000000n,
-    blackRooks:   0x8100000000000000n,
-    blackQueens:  0x0800000000000000n,
-    blackKing:    0x1000000000000000n,
-};
-
 // ======================= MAIN ============================
 function Board() {
     const svgRef = useRef<SVGSVGElement | null>(null);
-    const [board, setBoard] = useState<(PieceSymbol | null)[]>(
-        () => BitboardsToBoard(DUMMY_BITBOARDS, CONSTANTS.IS_WHITE)
-    );
+    const {board, applyMove} = useChessGame();
+    const [isConnected, setIsConnected] = useState(false);
+    const {playerColor, gameReady, setPlayerColor, setGameReady, isYourPiece} = useChessPlayer();
+
+    const onConnected = useCallback((color: 'white' | 'black') => {
+        setPlayerColor(color);
+        setIsConnected(true);
+    }, [setPlayerColor]);
+
+    const onGameStart = useCallback(() => {
+        setGameReady(true);
+    }, [setGameReady]);
+
+    const onPlayerLeft = useCallback(() => {
+        setGameReady(false);
+        setIsConnected(false);
+    }, [setGameReady]);
+
+    const { sendMove } = useChessSocket({
+        onConnected,
+        onGameStart,
+        onMove: applyMove,   // applyMove should already be stable from useChessGame
+        onPlayerLeft,
+    });
     const {drag, draggingFrom, startDrag, moveDrag, endDrag, cancelDrag} = usePieceDrag({
         svgRef,
         onDrop: ({piece, from, to}) => {
-            if (from.row === to.row && from.col === to.col) return;  // Don't allow piece to be dropped on itself
-            console.log(`Dropped ${piece} from ${from.row} ${from.col} to ${to.row} ${to.col}`);
-            setBoard(
-                (prevBoard) => {
-                    const newBoard = [...prevBoard];
-                    newBoard[to.row * CONSTANTS.NUM_ROW + to.col] = piece;
-                    newBoard[from.row * CONSTANTS.NUM_ROW + from.col] = null;
-                    return newBoard;
-                }
-            )
-            // TODO: Implement piece drop logic and API calls
+            if (!isYourPiece(piece) || !gameReady || !isConnected) return;
+            applyMove({piece, from, to});
+            sendMove({piece, from, to});
         },
     });
 

@@ -1,0 +1,1 @@
+This folder will hold files that make contact with the server

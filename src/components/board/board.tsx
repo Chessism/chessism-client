@@ -6,7 +6,7 @@ import {createLetterLabel, createNumberLabel} from "../../utils/boardRender.tsx"
 import {usePieceDrag} from "../../hooks/pieceDrag/pieceDrag.tsx";
 import {type PieceSymbol, PIECE_IMAGES} from "../../lib/pieceMap.ts";
 import {handleLeftClick, handleRightClick} from "./mouseEvents.tsx";
-import Square from "./square";
+import Square from "./square.tsx";
 import Piece from "../piece/piece.tsx";
 import * as CONSTANTS from "../../constants.ts";
 import './board.css'
@@ -41,6 +41,7 @@ function Board() {
     const {drag, draggingFrom, startDrag, moveDrag, endDrag, cancelDrag} = usePieceDrag({
         svgRef,
         onDrop: ({piece, from, to}) => {
+            console.log("PIECE MOVED!!!!");
             if (!isYourPiece(piece) || !gameReady || !isConnected) return;
             applyMove({piece, from, to});
             sendMove({piece, from, to});

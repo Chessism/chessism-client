@@ -1,7 +1,4 @@
 import {useRef, useState, useCallback} from "react";
-import {useChessGame} from "../../hooks/webSocket/useChessBoard.ts";
-import {useChessPlayer} from "../../hooks/webSocket/useChessPlayer.ts";
-import {useChessSocket} from "../../hooks/webSocket/webSocket.ts"
 import {createLetterLabel, createNumberLabel} from "../../utils/boardRender.tsx";
 import {usePieceDrag} from "../../hooks/pieceDrag/pieceDrag.tsx";
 import {type PieceSymbol, PIECE_IMAGES} from "../../lib/pieceMap.ts";
@@ -10,41 +7,24 @@ import Square from "./square.tsx";
 import Piece from "../piece/piece.tsx";
 import * as CONSTANTS from "../../constants.ts";
 import './board.css'
+import { BitboardsToBoard, type BitboardData } from "../../utils/boardState.ts";
+
+interface BoardProps {
+    bitboards: BitboardData;
+    isWhite: boolean;
+}
 
 // ======================= MAIN ============================
-function Board() {
+function Board({ bitboards, isWhite }: BoardProps) {
     const svgRef = useRef<SVGSVGElement | null>(null);
-    const {board, applyMove} = useChessGame();
-    const [isConnected, setIsConnected] = useState(false);
-    const {playerColor, gameReady, setPlayerColor, setGameReady, isYourPiece} = useChessPlayer();
+    const board = BitboardsToBoard(bitboards, isWhite);
 
-    const onConnected = useCallback((color: 'white' | 'black') => {
-        setPlayerColor(color);
-        setIsConnected(true);
-    }, [setPlayerColor]);
-
-    const onGameStart = useCallback(() => {
-        setGameReady(true);
-    }, [setGameReady]);
-
-    const onPlayerLeft = useCallback(() => {
-        setGameReady(false);
-        setIsConnected(false);
-    }, [setGameReady]);
-
-    const { sendMove } = useChessSocket({
-        onConnected,
-        onGameStart,
-        onMove: applyMove,   // applyMove should already be stable from useChessGame
-        onPlayerLeft,
-    });
     const {drag, draggingFrom, startDrag, moveDrag, endDrag, cancelDrag} = usePieceDrag({
         svgRef,
         onDrop: ({piece, from, to}) => {
-            console.log("PIECE MOVED!!!!");
-            if (!isYourPiece(piece) || !gameReady || !isConnected) return;
-            applyMove({piece, from, to});
-            sendMove({piece, from, to});
+            console.log(`${piece} wants to move from [${from.row}, ${from.col}] to [${to.row}, ${to.col}]`);
+            // here's where'd we send stuff to the server and the server will update everyone's bitboard
+            // server.send("move from x t y")
         },
     });
 

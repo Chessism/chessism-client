@@ -4,11 +4,17 @@ import requestGame from '../services/requestGame.ts'
 
 import './globalPage.css'
 import { useEffect, useState } from 'react';
+import type { BitboardData } from '../utils/boardState.ts';
+import {START_BITBOARDS} from '../constants.ts';
+
 const GamePage = () => {
     // declare consts
     const navigate = useNavigate();
     const userID = localStorage.getItem("userID");
     const [oppoID, setOpID] = useState("Finding an Opponent...")
+    // current board state (updates from server). placeholders until server responds otherwise
+    const [bitboards, setBitboards] = useState<BitboardData>(START_BITBOARDS);
+    const [isWhite, setIsWhite] = useState<boolean>(true);
 
     // Join queue
     useEffect(() => {
@@ -24,7 +30,7 @@ const GamePage = () => {
             {/* CREATE BOARD */}
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                 <div style={{ width: '40%', aspectRatio: '1 / 1'}}>
-                    <Board />
+                    <Board bitboards={bitboards} isWhite={isWhite /* default */} />
                 </div>
             </div>
             <h1>Your ID: {userID}</h1>

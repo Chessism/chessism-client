@@ -1,41 +1,29 @@
-import { useNavigate } from 'react-router-dom';
-import Board from '../components/board/Board.tsx'
-import requestGame from '../services/requestGame.ts'
-
-import './globalPage.css'
-import { useEffect, useState } from 'react';
-import type { BitboardData } from '../utils/boardState.ts';
-import {START_BITBOARDS} from '../constants.ts';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Board } from '../../components/board/board.tsx';
+import { useGameSocket } from '../hooks/webSocket/useGameSocket';
+import './globalPage.css';
 
 const GamePage = () => {
-    // declare consts
     const navigate = useNavigate();
-    const userID = localStorage.getItem("userID");
-    const [oppoID, setOpID] = useState("Finding an Opponent...")
-    // current board state (updates from server). placeholders until server responds otherwise
-    const [bitboards, setBitboards] = useState<BitboardData>(START_BITBOARDS);
-    const [isWhite, setIsWhite] = useState<boolean>(true);
+    const { gameId } = useParams();
+    const { bitboard, isWhite, gameStatus, sendMove } = useGameSocket(gameId!);
 
-    // Join queue
-    useEffect(() => {
-        requestGame(userID).then((data) => {
-            setOpID(data.oppo_id)
-        });
-    }, []);
-    // Game page ui
+    const debugFunction = () => {
+        console.log("Debug button pressed");
+        
+    }
+    // ==== Game page ui ====
     return (
         <div>
             <button onClick={() => navigate('/')}>Main Menu</button>
-            <h1>Opponent ID: {oppoID}</h1>
-            {/* CREATE BOARD */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <div style={{ width: '40%', aspectRatio: '1 / 1'}}>
-                    <Board bitboards={bitboards} isWhite={isWhite /* default */} />
+            <h1>Game Status: {gameStatus}</h1>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: '40%', aspectRatio: '1 / 1' }}>
+                    <Board bitboards={bitboard} isWhite={isWhite} />
                 </div>
             </div>
-            <h1>Your ID: {userID}</h1>
+            <button onClick={debugFunction}> Run a command </button>
         </div>
     );
 };
-
 export default GamePage;

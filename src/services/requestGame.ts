@@ -1,30 +1,34 @@
-import { data } from "react-router-dom";
+import type { JoinQueueRequest, JoinQueueResponse } from "../lib/apiPayloads";
 
-const requestGame = async (userID: string) => {
-    const userAuth = localStorage.getItem("userAuth");
-    
+const requestGame = async (nickname: string): Promise<JoinQueueResponse> => {
+
+    const payload: JoinQueueRequest = {
+        nick_name: nickname,
+    };
+
     const response = await fetch("http://localhost:8000/join-queue", {
         method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({
-            user_id: parseInt(userID),
-            auth_token: userAuth,
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
     });
 
-    const response_data = await response.json();
-    const status = response_data.status
+    const data: JoinQueueResponse = await response.json();
 
-    if (status == "Failed") {
-        console.log(response_data.reason)
-    } else if (status == "Waiting") {
-        console.log("Waiting in the queue...")
-    } else if (status == "Success") {
-        console.log(`Joined game id ${response_data.game_id} against player ${response_data.oppo_id}`)
-    } else {
-        console.log("Unknown status")
+    switch (data.status) {
+        case "Failed":
+            console.log(data.reason);
+            break;
+        case "Waiting":
+            console.log("Waiting in the queue...");
+            break;
+        case "Success":
+            console.log(`Joined game id ${data.game_id} against player ${data.oppo_id}`);
+            break;
+        default:
+            console.log("Unknown status");
     }
-    return response_data;
-}
+
+    return data;
+};
 
 export default requestGame;

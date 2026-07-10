@@ -10,8 +10,9 @@ function App() {
         {/* URL: / */}
         <Route path="/" element={<HomePage />} />
         
-        {/* URL: /game */}
-        <Route path="/game" element={<GamePage />} />
+        {/* URL: /game/{GAMEID} */}
+        <Route path="/game/:gameId" element={<GamePage />} />
+        
       </Routes>
     </Router>
   );

@@ -18,7 +18,9 @@ interface BoardProps {
 function Board({ bitboards, isWhite }: BoardProps) {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const board = BitboardsToBoard(bitboards, isWhite);
+    const elements = [];
 
+    // Dragging pieces feature
     const {drag, draggingFrom, startDrag, moveDrag, endDrag, cancelDrag} = usePieceDrag({
         svgRef,
         onDrop: ({piece, from, to}) => {
@@ -27,9 +29,6 @@ function Board({ bitboards, isWhite }: BoardProps) {
             // server.send("move from x t y")
         },
     });
-
-
-    const elements = [];
 
     for (let row = 0; row < CONSTANTS.NUM_ROW; row++) {
         for (let col = 0; col < CONSTANTS.NUM_COL; col++) {

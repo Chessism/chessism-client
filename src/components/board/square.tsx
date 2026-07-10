@@ -19,7 +19,7 @@ function Square({row, col, onLeftClick, onRightClick}: Params) {
             y={y}
             width={CONSTANTS.SQUARE_SIZE}
             height={CONSTANTS.SQUARE_SIZE}
-            fill={isLight ? "#EBD7A4" : "#385E0B"}
+            fill={isLight ? CONSTANTS.WHITE_SQUARE_COL: CONSTANTS.BLACK_SQUARE_COL}
             onClick={onLeftClick}
             onContextMenu={onRightClick}
         />
